@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+  <head>
+    <meta charset='utf-8'/>
+    <title>Private Mode Browsing</title>
+    <!-- // <script src='http://w3.dev/2009/dap/ReSpec.js/js/respec.js' class='remove'></script> -->
+    <!-- // <script src='../lib/respec/js/require.js' data-main='../lib/respec/js/profile-w3c-common' async class='remove'></script> -->
+    <!-- // <script src='../builds/respec-w3c-common.js' async class='remove'></script> -->
+    <!-- // <script src='//www.w3.org/Tools/respec/respec-w3c-common' async class='remove'></script> -->
+    <script src='http://www.w3.org/Tools/respec/respec-w3c-common' async class='remove'></script>
+    <script class='remove'>
+      var respecConfig = {
+              format:       "markdown" 
+          ,   specStatus:   "ED"
+          ,   shortName:    "private-mode"
+          ,   editors:      [{ name: "Mark Nottingham", 
+                               url: "http://www.mnot.net/", 
+                               mailto: "mnot@mnot.net", 
+                            }]
+          ,   edDraftURI:   "http://w3ctag.github.io/private-mode/"
+		  ,   wg:           "Technical Architecure Group"
+		  ,   wgURI:        "http://www.w3.org/2001/tag/"
+		  ,   wgPublicList:  "www-tag"
+		  ,   wgPatentURI:  "http://www.w3.org/2001/tag/disclosures"
+		  ,   otherLinks:     [{
+		              key: "Repository",
+		              data: [{
+		                      value: "We are on Github.",
+		                      href: "https://github.com/w3ctag/private-mode"
+		                  }, {
+		                      value: "File a bug.",
+		                      href: "https://github.com/w3ctag/private-mode/issues"
+		                  }, {
+		                      value: "Commit history.",
+		                      href: "https://github.com/w3ctag/private-mode/commits/gh-pages"
+		                  }
+		              ]
+		          }
+		      ]
+        };
+    </script>
+  </head>
+  <body>
+
+    <section id="abstract">
+
+This document describes the requirements of "private mode" for Web browsers.
+
+    </section>
+	
+	<section id="sotd">
+		
+This is a proposed Working Draft, whose ultimate disposition is currently indeterminate.
+		
+	</section>
+    
+    <section id="conformance">
+    </section>
+    
+    <section>
+
+## Introduction
+
+Many Web browsers have "privacy" modes (a.k.a. "Incognito" or "Private Browsing"), but their
+purpose, capabilities and limitations are often misunderstood. In part, this is because privacy on
+the Web is a complex and constantly changing topic; however, it is does not help that existing
+privacy modes have subtle differences in their implementation (even between versions of one
+browser).
+
+This confusion has caused some to question whether privacy mode should be included in browsers at
+all, because a privacy-related feature that is confusing can do much more harm than good.
+
+This specification takes an opposing position; the logical thing to do when there are several
+slightly different and changing versions of a feature that adds value yet causes confusion is to
+standardize that feature, so as to align implementations (thereby avoiding confusion), as well as
+to provide a platform for building additional functionality upon.
+
+In particular, standardizing a definition of "privacy mode" that is technically specific and
+reflecting of best practice allows us to "level up" expectations of privacy on the Web; if enough
+users turn privacy mode on by default, Web sites will be engineered to be usable with these
+settings, allowing more people to use privacy mode, and so on.
+
+Furthermore, having implementations align their behavior when in privacy mode brings more
+protection against privacy-defeating attacks like fingerprinting.
+
+
+## What is Privacy Mode?
+
+Privacy mode is a distinct signal from the user that they are prioritizing privacy over other
+factors. This explicitly includes usability and compatibility with existing Web sites, although
+where feasible, they should not be impacted.
+
+A browser in privacy mode will do everything it can to:
+
+* Keep communication private from other users on the same machine, including those using the
+  browser afterwards ("Process Privacy"),
+* Keep communication private from intervening networks and other observers with network access
+  ("Network Privacy"),
+* Prevent the server from connecting activity to a user's Personally Identifying Information unless
+  explicitly provided ("Server Privacy"),
+* Fail in situations when someone might be trying to subvert these goals, and
+* Gain the user's informed consent when it cannot meet these goals.
+
+
+### Informed Consent
+
+In practice, a browser might not be able to meet all of the goals above, or may choose not to
+provide the implied level of privacy that they offer.
+
+An implementation can still achieve conformance by gaining the user's informed consent when some
+requirements of this specification are not met. Note that informed consent is only acceptable when
+a requirement explicitly allows it.
+
+_Informed consent_ in this specification means that the nature of the potential loss of privacy has
+been explained to the user before it occurs but in the same browsing session, and the user has
+taken explicit action to proceed despite this.
+
+There are several ways to achieve this, each having different privacy and user experience
+characteristics. This specification does not mandate any particular approach, but notes a few
+options:
+
+* Modal dialog boxes are the most obvious way to obtain informed consent, but they are often
+  "clicked through" and forgotten. 
+  
+* Explicitly dropping out of private mode when a user chooses to proceed has the benefit of
+  reinforcing the risks to the user, and making them visible beyond the moment the user makes a
+  decision.
+
+* It is permissible to inform the user of unaddressed privacy requirements when the browser first
+  enters private mode, upon the assumption that their continued use of private mode constitutes
+  informed consent.
+  
+* Describing unaddressed requirements in documentation or release notes is not adequate to achieve
+  informed consent.
+
+Of course, refusing to violate the requirements of private mode (a.k.a. "hard failure") is the most
+effective way to assure privacy. I.e., user agents are not required to give the user the option of
+giving informed consent.
+
+
+
+### Trust and Intermediaries
+
+<div class='issue'>
+	This needs to cover trust issues around configuring proxies; they can be useful (e.g., for Tor)
+or harmful.
+</div>
+
+</section>
+
+<section>
+
+## Process Privacy
+
+Maintaining process privacy means assuring that no recoverable information about the user's
+activity remains on the system once the private browsing session is terminated. Of course, this
+cannot be guaranteed, since a compromised system might monitor the users' behavior (e.g., using a
+key logger). However, if a non-hostile environment is assumed, process privacy can be maintained.
+
+Browsers in private mode MUST make all state associated with the browsing session
+unavailable after it terminates.
+
+This includes the HTTP cache, AppCache, LocalStorage, history, cookie store, password and
+form-filling facilities, and similar facilities.
+
+Browsers in private mode SHOULD NOT use persistent storage (e.g., disk), and SHOULD avoid having
+session state "swapped out" to persistent storage when possible.
+
+Browsers in private mode MUST NOT log information about the browsing session.
+
+
+## Network Privacy
+
+Maintaining network privacy means assuring that end-to-end encryption is used wherever possible.
+Since the IP addresses of sites themselves compromise sensitive data, these also need to be
+obfuscated, although it is recognized that this likely won't be a default configuration for many
+browsers in private mode (i.e., they'll always need to gain informed consent for this concern).
+
+### TCP/IP
+
+Browsers in private mode MUST obfuscate TCP/IP traffic to prevent an attacker with passive access
+to the network from identifying what Web site(s) are being accessed, or gain the user's informed
+consent.
+
+Practically, this means that the browser needs to use a proxy network like Tor in private browsing
+mode, or notify the user that it cannot.
+
+
+### DNS
+
+Browsers in private mode MUST encrypt DNS requests to prevent an attacker with passive access to
+the network from identifying what Web site(s) are being accessed, or gain the user's informed
+consent.
+
+Practically, this means that the browser needs to use some form of DNS encryption, or offload DNS
+lookups onto a trusted intermediary via an encrypted connection.
+
+
+### TLS 
+
+Browsers in private mode MUST NOT allow a certificate failure to be ignored by the user; all
+failures are considered "hard" in private mode (even if the user has given informed consent).
+
+Browsers in private mode MUST negotiate ciphersuites with forward secrecy, and MUST NOT accept
+other ciphersuites while in private mode, unless the user has given informed consent.
+
+Browsers MUST NOT send unencrypted TLS SNI, unless the user has given informed consent.
+Practically, this means that SNI can only be sent when the connection is already encrypted (e.g.,
+through a proxy).
+
+
+### HTTP
+
+Browsers MUST NOT allow access to a Web site with the http:// URL scheme without the user's
+informed consent. Browsers MAY automatically probe a corresponding https:// URL to determine its
+support for HSTS, and redirect to https:// where appropriate.
+
+Browsers in private mode MUST use a minimum of HTTP/1.1 for requests, and SHOULD use HTTP/2. 
+
+Browsers in private mode sending HTTP/1.1 requests SHOULD obfuscate traffic patterns, using
+techniques like padding (in chunk-extensions or header fields) and segmented requests (using Range
+requests).
+
+
+## Server Privacy
+
+Maintaining server privacy means limiting its ability to identify the user, through
+"fingerprinting" the client, or associating the user's behavior on one site with that on another
+(using a mechanism like cookies).
+
+### HTTP
+
+Upon entering private mode, browsers MUST NOT use previously-established HTTP connections.
+
+Browsers in private mode MUST emit a User-Agent request header field in all requests. It MUST have
+the field-value "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.16) Gecko/20080702
+Firefox/2.0.0.16".
+
+Browsers in private mode MUST emit an Accept-Encoding request header field with the value "gzip".
+
+Browsers in private mode MUST NOT emit any of the following request header fields: Accept,
+Accept-Language, Accept-Charset, If-None-Match, Keep-Alive, UA-Color, UA-Media, UA-Pixels,
+UA-Resolution, UA-Windowpixels. Other headers SHOULD NOT be emitted unless they are necessary for
+protocol operation.
+
+Browsers in private mode MUST emit request header fields in alphabetic order.
+
+#### HTTP/1.1
+
+When using HTTP/1.1, browsers in private mode MUST emit the request-line in the following form:
+
+	method SP request-uri SP "HTTP/1.1" CLRF
+
+When using HTTP/1.1, browsers in private mode MUST emit header fields in the following form:
+
+	field-name ":" SP field-value CLRF
+    
+and comma separated field-values MUST all occur in the same header-field, in this form:
+
+	field-name ":" SP field-value COMMA SP field-value CLRF    
+
+A typical HTTP/1.1 request from a browser in private mode would thus look like this (long header
+wrapped for illustrative purposes only):
+
+	GET /thing HTTP/1.1
+	Accept-Encoding: gzip
+	Host: www.example.com
+	User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; 
+		    en-US; rv:1.8.1.16) Gecko/20080702 Firefox/2.0.0.16
+
+<div class='issue'>
+Is this level of precision for HTTP requests necessary? It doesn't completely address HTTP
+fingerprinting, and could be a major implementation pain.
+</div>
+
+### Cookies
+
+Browsers in private mode MUST NOT store or emit "third party" cookies. This document defines these
+as cookies whose allowed scope does not include the URL of the current navigation context.
+
+
+### JavaScript APIs
+
+Browsers in private mode that support HTML5 canvas MUST always consider the canvas element's
+bitmap's 
+[origin-clean flag](http://www.whatwg.org/specs/web-apps/current-work/multipage/scripting.html#concept-canvas-origin-clean) 
+to be 'false', unless the user provides informed consent.
+
+<div class="issue">
+TBD: history, fonts, introspection, geolocation, keypress, window, WebStorage, etc.
+</div>
+
+### User eXperience
+
+Browsers in private mode SHOULD disable extensions that have unknown security properties.
+
+Browsers in private mode MUST NOT make requests that are not directly attributable to user
+behavior (i.e., loading a page and its assets, along with requests caused by scripts loaded by the
+page). In particular, additional "services" such as spell check, translation, malware prevention,
+etc. ought not be enabled, unless their use does not leak information about user behavior.
+
+
+
+</section>
+
+  </body>
+</html>
